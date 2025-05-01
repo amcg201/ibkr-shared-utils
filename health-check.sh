@@ -11,15 +11,21 @@ check_log() {
     local log_file="$2"
 
     if [ ! -f "$log_file" ]; then
-        echo "$bot_name log file missing!"
-        return
-    fi
+    echo "$bot_name log file missing!"
+    send_email "⚠️ $bot_name log file missing!"
+    return
+fi
 
-    if ! grep -q "$TODAY" "$log_file"; then
-        send_email "⚠️ $bot_name bot produced no output today."
-    elif grep -qE "Traceback|Exception|Error" "$log_file"; then
-        send_email "🚨 $bot_name bot error detected in log. Check immediately."
-    fi
+if ! grep -q "$TODAY" "$log_file"; then
+    echo "⚠️ $bot_name bot produced no output today."
+    send_email "⚠️ $bot_name bot produced no output today."
+elif grep -qE "Traceback|Exception|Error" "$log_file"; then
+    echo "🚨 $bot_name bot error detected in log."
+    send_email "🚨 $bot_name bot error detected in log. Check immediately."
+else
+    echo "✅ $bot_name bot ran successfully today."
+fi
+
 }
 
 send_email() {
@@ -43,3 +49,4 @@ server.quit()
 
 check_log "Turtle" "$TURTLE_LOG"
 check_log "Forex" "$FOREX_LOG"
+send_email "✅ Health check complete. No issues found for Turtle and Forex bots."
